@@ -57,9 +57,11 @@ variable_count = 0
 x = 0
 for line in stdin:
     list1 = (line.strip()).split();
+    if(line == "\n"):
+        continue
     if(list1[0] == "var"):
         error_finderv(list1)
-        variable_list[list1[1]] = x;
+        variable_list[list1[1]] = x;  # Real memory location of the variable instruction is x + instruction_count
         variable_name_list.append(list1[1])
         variable_count += 1
     elif(list1[0][-1] == ":"):
@@ -70,4 +72,5 @@ for line in stdin:
 
 error_finderf(variable_list,label_list,variable_name_list, label_name_list)
 
+instuction_count = x - variable_count
 print("ok")
