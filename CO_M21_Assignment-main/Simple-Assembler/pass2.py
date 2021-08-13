@@ -2,6 +2,18 @@ from sys import stdin
 
 from pass1 import variable_list,label_list,instuction_count;
 
+def binary_converter(a):
+    ans = ""
+    if(a == 0 or a == 1):
+        return "0000000" + a
+    while(a != 0 and a != 1):
+        ans += f"{a%2}"
+        a = a//2
+    ans += f"{a}"
+    ans = ans[::-1]
+    n = len(ans)
+    return "0"*(8-n) + ans
+
 def solver(list1, start_index, operation_dict, register_dict):
     ans = ""
     if(operation_dict[list1[start_index]][1] == "A"):
@@ -34,9 +46,7 @@ def solver(list1, start_index, operation_dict, register_dict):
 
     elif(operation_dict[list1[start_index]][1] == "F"):
         ans = operation_dict[list1[start_index]][0]+"00000000000"
-        
-
-
+        return ans
 
 operation_dict = {    # Does not have the two mov instructions
 "add":["00000","A"],  
