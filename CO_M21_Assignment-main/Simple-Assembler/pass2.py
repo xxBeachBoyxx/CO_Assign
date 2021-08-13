@@ -10,7 +10,7 @@ def binary_converter(a):
         ans += a%2
         a = a/2
     ans += a
-    ans = ans
+    ans = ans[:-1]
 
 
 def solver(list1, start_index, operation_dict, register_dict):
@@ -22,7 +22,30 @@ def solver(list1, start_index, operation_dict, register_dict):
         return ans
     elif(operation_dict[list1[start_index]][1] == "B"):
         ans = operation_dict[list1[start_index]][0] + register_dict[list1[start_index+1]]
+        a = binary_converter(register_dict[list1[start_index+2]])
+        ans = ans+ a
 
+    elif(operation_dict[list1[start_index]][1] == "C"):
+        ans = operation_dict[list1[start_index]][0]+"00000"
+        for i in list1[start_index+1:]:
+            ans += register_dict[i]
+        return ans
+
+    elif(operation_dict[list1[start_index]][1] == "D"):
+        ans = operation_dict[list1[start_index]][0]+register_dict[list1[start_index+1]]
+        k=variable_list[list1[start_index+2]]+instuction_count
+        g = binary_converter(k)
+        return ans+g
+
+    elif(operation_dict[list1[start_index]][1] == "E"):
+        ans = operation_dict[list1[start_index]][0]+register_dict[list1[start_index+1]]
+        h=variable_list[list1[start_index+2]]+instuction_count
+        i = binary_converter(h)
+        return ans+i
+
+    elif(operation_dict[list1[start_index]][1] == "F"):
+        ans = operation_dict[list1[start_index]][0]+"00000000000"
+        
 
 
 
@@ -57,13 +80,16 @@ register_dict = {
 "R7":"111"
 }
 
-for line in stdin:
-    list1 = (line.strip()).split();
-    if(list1[0] == "var" or line == "\n"):
+for line in stdin: # ['lab:', add r1 r2 r3
+    # add r g h
+    # hlt 
+    list1 = (line.strip()).split()
+
+    if(list1[0] == "var" or line == "/n"):
         continue
     if(list1[0][-1] == ":"):
         if(list1[0][:-1] in operation_dict.keys()):  # Checks if a operation name is used as a label
             raise RuntimeError(" Error in the assembly code ")
-        
+        solver()    
     else:
         pass
