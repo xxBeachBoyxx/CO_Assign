@@ -73,4 +73,3 @@ for line in stdin:
 error_finderf(variable_list,label_list,variable_name_list, label_name_list)
 
 instuction_count = x - variable_count
-print("ok")
