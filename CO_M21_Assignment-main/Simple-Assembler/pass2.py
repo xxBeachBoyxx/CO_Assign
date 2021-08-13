@@ -7,10 +7,13 @@ def binary_converter(a):
     if(a == 0 or a == 1):
         return "0000000" + a
     while(a != 0 and a != 1):
-        ans += a%2
-        a = a/2
-    ans += a
-    ans = ans
+        ans += f"{a%2}"
+        a = a//2
+    ans += f"{a}"
+    ans = ans[::-1]
+    n = len(ans)
+    return "0"*(8-n) + ans
+
 
 
 def solver(list1, start_index, operation_dict, register_dict):
@@ -67,3 +70,4 @@ for line in stdin:
         
     else:
         pass
+
