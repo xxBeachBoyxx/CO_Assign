@@ -7,11 +7,12 @@ def binary_converter(a):
     if(a == 0 or a == 1):
         return "0000000" + a
     while(a != 0 and a != 1):
-        ans += a%2
-        a = a/2
-    ans += a
-    ans = ans
-
+        ans += f"{a%2}"
+        a = a//2
+    ans += f"{a}"
+    ans = ans[::-1]
+    n = len(ans)
+    return "0"*(8-n) + ans
 
 def solver(list1, start_index, operation_dict, register_dict):
     ans = ""
@@ -22,8 +23,30 @@ def solver(list1, start_index, operation_dict, register_dict):
         return ans
     elif(operation_dict[list1[start_index]][1] == "B"):
         ans = operation_dict[list1[start_index]][0] + register_dict[list1[start_index+1]]
+        a = binary_converter(register_dict[list1[start_index+2]])
+        ans = ans+ a
 
+    elif(operation_dict[list1[start_index]][1] == "C"):
+        ans = operation_dict[list1[start_index]][0]+"00000"
+        for i in list1[start_index+1:]:
+            ans += register_dict[i]
+        return ans
 
+    elif(operation_dict[list1[start_index]][1] == "D"):
+        ans = operation_dict[list1[start_index]][0]+register_dict[list1[start_index+1]]
+        k=variable_list[list1[start_index+2]]+instuction_count
+        g = binary_converter(k)
+        return ans+g
+
+    elif(operation_dict[list1[start_index]][1] == "E"):
+        ans = operation_dict[list1[start_index]][0]+register_dict[list1[start_index+1]]
+        h=variable_list[list1[start_index+2]]+instuction_count
+        i = binary_converter(h)
+        return ans+i
+
+    elif(operation_dict[list1[start_index]][1] == "F"):
+        ans = operation_dict[list1[start_index]][0]+"00000000000"
+        return ans
 
 operation_dict = {    # Does not have the two mov instructions
 "add":["00000","A"],  
