@@ -80,7 +80,10 @@ def checkerror(list1):
                     if list1[2] in variable_list.keys():   #syntax check
                         return True
             elif list1[0]=="mov":
-                pass
+                if list1[1] in register_dict.keys() and list1[2][0]=="$" and (int(list1[2][1:])>=0 and int(list1[2][1:])<=255):
+                    return True
+                elif list1[1] in register_dict.keys() and list1[2] in register_dict.keys():
+                    return True
         elif len(list1)==2: # len=2-->possible types:E
             if operation_dict[list1[0]][1]=="E": #checks if instruction is E
                 if list1[1] in label_list.keys():          #syntax check
