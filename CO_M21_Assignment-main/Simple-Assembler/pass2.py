@@ -50,7 +50,7 @@ def solver(list1, start_index, operation_dict, register_dict):
         ans = operation_dict[list1[start_index]][0]+"00000000000"
         return ans
 
-def checkerror(list1): 
+def checkerror(list1):  
     if list1[0] in operation_dict.keys():
         if len(list1)==4: # len=4-->possible types:A
             if operation_dict[list1[0]][1]=="A": #checks if instruction is A 
@@ -67,6 +67,8 @@ def checkerror(list1):
                 if list1[1] in register_dict.keys(): 
                     if list1[2] in variable_list.keys():   #syntax check
                         return True
+            elif list1[0]=="mov":
+                pass
         elif len(list1)==2: # len=2-->possible types:E
             if operation_dict[list1[0]][1]=="E": #checks if instruction is E
                 if list1[1] in label_list.keys():          #syntax check
@@ -116,7 +118,7 @@ for line in stdin:
         if(list1[0][:-1] in operation_dict.keys()):  # Checks if a operation name is used as a label
             raise RuntimeError(" Error in the assembly code ")
         else:
-            if(checkerror(list1[1:])): #checks if there are no errors 
+            if(checkerror(list1[1:])): #checks if there are no errors in the instruction that follows after label
                    sys.stdout.write(solver(list1,1,operation_dict,register_dict))
             else:
                 raise RuntimeError(" Error in the assembly code ")
