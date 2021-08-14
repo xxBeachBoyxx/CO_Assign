@@ -1,6 +1,8 @@
 from sys import stdin
 
-from pass1 import variable_list,label_list,instuction_count;
+import sys
+
+from pass1 import variable_list,label_list,instuction_count,x;
 
 def binary_converter(a):
     ans = ""
@@ -50,27 +52,27 @@ def solver(list1, start_index, operation_dict, register_dict):
 
 def checkerror(list1): 
     if list1[0] in operation_dict.keys():
-        if len(list1)==4:
-            if operation_dict[list1[0]][1]=="A":
-                if list1[1] in register_dict.keys() and list1[2] in register_dict.keys() and list1[3] in register_dict.keys():
+        if len(list1)==4: # len=4-->possible types:A
+            if operation_dict[list1[0]][1]=="A": #checks if instruction is A 
+                if list1[1] in register_dict.keys() and list1[2] in register_dict.keys() and list1[3] in register_dict.keys(): #syntax check
                     return True
-        elif len(list1)==3:
-            if operation_dict[list1[0]][1]=="B":
-                if list1[1] in register_dict.keys() and list1[2][0]=="$" and (int(list1[2][1:])>=0 and int(list1[2][1:])<=255):
+        elif len(list1)==3: # len=3-->possible types:B,C,D
+            if operation_dict[list1[0]][1]=="B": #checks if instruction is B
+                if list1[1] in register_dict.keys() and list1[2][0]=="$" and (int(list1[2][1:])>=0 and int(list1[2][1:])<=255): #syntax check
                     return True
-            elif operation_dict[list1[0]][1]=="C":
-                if list1[1] in register_dict.keys() and list1[2] in register_dict.keys():
+            elif operation_dict[list1[0]][1]=="C": #checks if instruction is C
+                if list1[1] in register_dict.keys() and list1[2] in register_dict.keys(): #syntax check
                     return True
-            elif operation_dict[list1[0]][1]=="D":
+            elif operation_dict[list1[0]][1]=="D": #checks if instruction is D
                 if list1[1] in register_dict.keys(): 
-                    if list1[2] in variable_list.keys():   # not sure about this
+                    if list1[2] in variable_list.keys():   #syntax check
                         return True
-        elif len(list1)==2:
-            if operation_dict[list1[0]][1]=="E":
-                if list1[1] in label_list.keys():          # again not sure
+        elif len(list1)==2: # len=2-->possible types:E
+            if operation_dict[list1[0]][1]=="E": #checks if instruction is E
+                if list1[1] in label_list.keys():          #syntax check
                     return True
-        elif len(list1)==1:
-            if operation_dict[list1[0]][1]=="F":
+        elif len(list1)==1: # len=1-->possible types:F
+            if operation_dict[list1[0]][1]=="F" and i==x: #checks if instruction is F and if it is the last instruction
                 return True
     return False
 
@@ -108,24 +110,19 @@ register_dict = {
 i=0
 for line in stdin:
     list1 = (line.strip()).split()
-    if(i==x):
-        if(checkerror(list1)):
-            pass
-    else:
-        raise RuntimeError(" Error in the assembly code ")
     if(list1[0] == "var" or line == "\n"):
         continue
     if(list1[0][-1] == ":"):
         if(list1[0][:-1] in operation_dict.keys()):  # Checks if a operation name is used as a label
             raise RuntimeError(" Error in the assembly code ")
         else:
-            if(checkerror(list1[1:])):
-                   print(solver(list1,1,operation_dict,register_dict))
+            if(checkerror(list1[1:])): #checks if there are no errors 
+                   sys.stdout.write(solver(list1,1,operation_dict,register_dict))
             else:
                 raise RuntimeError(" Error in the assembly code ")
     else:
-        if(checkerror(list1)):
-            print(solver(list1,0,operation_dict,register_dict))
+        if(checkerror(list1)): #checks if there are no errors
+            sys.stdout.write(solver(list1,0,operation_dict,register_dict))
         else:
             raise RuntimeError(" Error in the assembly code ")
-        pass
+    i+=1
