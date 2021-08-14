@@ -49,6 +49,18 @@ def solver(list1, start_index, operation_dict, register_dict):
     elif(operation_dict[list1[start_index]][1] == "F"):
         ans = operation_dict[list1[start_index]][0]+"00000000000"
         return ans
+        
+    ## Checking for mov instruction
+    elif(len(list1[start_index:])==3): ## label: mov d1 d2 // label1: mov r $4 //label1: mov r2 R2 $
+        if(list1[start_index]=="mov" and list1[-1][0]=="$" and (int(list1[start_index+2][1:])>=0 and int(list1[start_index+2][1:])<=255)):
+            if(list1[start_index+1] in register_dict.keys()):
+                ans = "00010" + list1[start_index+1] + binary_converter(list1[-1][1:]) # B type 
+        if(list1[start_index]=="mov"):
+            if(list1[1] in register_dict.keys()):
+                if(list1[2] in register_dict.keys()):
+                    ans = "00011" + list1[start_index+1] + list1[start_index+2]
+        return ans
+    
 
 def checkerror(list1): 
     if list1[0] in operation_dict.keys():
