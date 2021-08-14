@@ -105,20 +105,26 @@ register_dict = {
 "R6":"110",
 "R7":"111"
 }
-
+i=0
 for line in stdin:
     list1 = (line.strip()).split()
+    if(i==x and checkerror(list1)):
+        pass
+    else:
+        raise RuntimeError(" Error in the assembly code ")
     if(list1[0] == "var" or line == "\n"):
         continue
     if(list1[0][-1] == ":"):
         if(list1[0][:-1] in operation_dict.keys()):  # Checks if a operation name is used as a label
             raise RuntimeError(" Error in the assembly code ")
         else:
-            if(list1[0][:]):
-                   pass
-            solver(list1,1,operation_dict,register_dict)
-        
+            if(checkerror(list1[1:])):
+                   print(solver(list1,1,operation_dict,register_dict))
+            else:
+                raise RuntimeError(" Error in the assembly code ")
     else:
-        if(list1[0] in operation_dict.keys()):
-            solver(list1,0,operation_dict,register_dict)
+        if(checkerror(list1)):
+            print(solver(list1,0,operation_dict,register_dict))
+        else:
+            raise RuntimeError(" Error in the assembly code ")
         pass
