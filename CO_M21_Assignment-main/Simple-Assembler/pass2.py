@@ -108,8 +108,9 @@ register_dict = {
 i=0
 for line in stdin:
     list1 = (line.strip()).split()
-    if(i==x and checkerror(list1)):
-        pass
+    if(i==x):
+        if(checkerror(list1)):
+            pass
     else:
         raise RuntimeError(" Error in the assembly code ")
     if(list1[0] == "var" or line == "\n"):
