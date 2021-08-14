@@ -152,11 +152,11 @@ def checkerror(list1):
     #print(x," ",i) 
 
     if list1[0]=="mov" or list1[0] in operation_dict.keys():
-        if len(list1)==4: # len=4-->possible types:A
+        if len(list1)==4 and i!=x-1: # len=4-->possible types:A
             if operation_dict[list1[0]][1]=="A": #checks if instruction is A 
                 if list1[1] in register_dict.keys() and list1[2] in register_dict.keys() and list1[3] in register_dict.keys(): #syntax check
                     return True
-        elif len(list1)==3: # len=3-->possible types:B,C,D
+        elif len(list1)==3 and i!=x-1: # len=3-->possible types:B,C,D
             if list1[0]=="mov":
                 if list1[1] in register_dict.keys() and list1[2][0]=="$" and (int(list1[2][1:])>=0 and int(list1[2][1:])<=255):
                     return True
@@ -173,7 +173,7 @@ def checkerror(list1):
                     if list1[2] in variable_list.keys():   # {"x":0}
                         return True
             
-        elif len(list1)==2: # len=2-->possible types:E
+        elif len(list1)==2 and i!=x-1: # len=2-->possible types:E
             if operation_dict[list1[0]][1]=="E": #checks if instruction is E
                 if list1[1] in label_list.keys():          #syntax check
                     return True
