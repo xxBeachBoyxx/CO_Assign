@@ -48,6 +48,33 @@ def solver(list1, start_index, operation_dict, register_dict):
         ans = operation_dict[list1[start_index]][0]+"00000000000"
         return ans
 
+def checkerror(list1): 
+    if list1[0] in operation_dict.keys():
+        if len(list1)==4:
+            if operation_dict[list1[0]][1]=="A":
+                if list1[1] in register_dict.keys() and list1[2] in register_dict.keys() and list1[3] in register_dict.keys():
+                    return True
+        elif len(list1)==3:
+            if operation_dict[list1[0]][1]=="B":
+                if list1[1] in register_dict.keys() and list1[2][0]=="$" and (int(list1[2][1:])>=0 and int(list1[2][1:])<=255):
+                    return True
+            elif operation_dict[list1[0]][1]=="C":
+                if list1[1] in register_dict.keys() and list1[2] in register_dict.keys():
+                    return True
+            elif operation_dict[list1[0]][1]=="D":
+                if list1[1] in register_dict.keys(): 
+                    if list1[2] in variable_list.keys():   # not sure about this
+                        return True
+        elif len(list1)==2:
+            if operation_dict[list1[0]][1]=="E":
+                if list1[1] in label_list.keys():          # again not sure
+                    return True
+        elif len(list1)==1:
+            if operation_dict[list1[0]][1]=="F":
+                return True
+    return False
+
+
 operation_dict = {    # Does not have the two mov instructions
 "add":["00000","A"],  
 "sub":["00001","A"],
