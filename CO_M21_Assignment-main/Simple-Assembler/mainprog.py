@@ -1,17 +1,24 @@
-
 import sys
 from sys import stdin
 reading = stdin.read()
 reading = reading.split("\n")
 
+
+error=False
+
 def error_finderv(list1): #
     if(len(list1) != 2): # Checks if the variable initialization instruction has more than two strings.
-        print(" Error in the assembly code1 ") 
-    for i in list1[1]:
-        if((i.isalnum() or i == "_")): # Checks if the variable name has just alphanumeric characters or underscores.
-            pass;
-        else:
-            print(" Error in the assembly code2 ")
+        print("General Syntax Error")
+         
+        return True
+    else:
+        for i in list1[1]:
+            if((i.isalnum() or i == "_")): # Checks if the variable name has just alphanumeric characters or underscores.
+                pass
+            else:
+                print("General Syntax Error")
+                return True
+    return False
 
 def error_finderl(list1):
     colon_count = 0
@@ -20,14 +27,16 @@ def error_finderl(list1):
             colon_count += 1 
     
     if(colon_count > 1): # Checks if there are more than one colon used in a label initialization instruction.
-        print(" Error in the assembly code3 ")
+        print("General Syntax Error")
+        return True
 
     for i in list1[0][:-1]:
         if((i.isalnum() or i == "_")): # Checks if the label name has just alphanumeric characters or underscores.
             pass
         else:
-            print(" Error in the assembly code 4")
-
+            print("General Syntax Error")
+            return True
+    return False
     
 def error_finderf(variable_list, label_list, variable_name_list, label_name_list):
     vkey = variable_list.keys()
@@ -35,13 +44,16 @@ def error_finderf(variable_list, label_list, variable_name_list, label_name_list
     
     intersection = [value for value in vkey if value in lkey]
     if(intersection != []):  # Checks if a variable name is used as a label or vice a versa.
-        print(" Error in the assembly code 6")
+        print(" Misuse of labels as variables or vice-versa")
+        return True
 
     if(len(variable_name_list) != len(list(set(variable_name_list)))): # Checks if a variable initialization is done more than once.
-        print(" Error in the assembly code7 ")
+        print(" Misuse of labels as variables or vice-versa")
+        return True
     
     if(len(label_name_list) != len(list(set(label_name_list)))):
-        print(" Error in the assembly code8 ")
+        print(" General Syntan Error")
+        return True
 
     variable_values = variable_list.values()
 
@@ -49,16 +61,30 @@ def error_finderf(variable_list, label_list, variable_name_list, label_name_list
         if i in variable_values:
             pass
         else:
-            print(" Error in the assembly code9 ")
-
-    
+            print(" General Syntax Error ")
+            return True
+    return False
 
 variable_list = {}
 variable_name_list = []
 label_list = {}
 label_name_list = []
 variable_count = 0
+
 x = 0
+
+for line in reading:
+    list1 = (line.strip()).split()
+
+    if(len(line)==0):
+        continue
+    if(list1[0] == "var"):
+        pass
+    elif(list1[0][-1] == ":"):
+        pass
+    x += 1
+
+y=0
 for line in reading:
     #print(line)
     list1 = (line.strip()).split()
@@ -67,21 +93,25 @@ for line in reading:
     if(len(line)==0):
         continue
     if(list1[0] == "var"):
-        error_finderv(list1)
-        variable_list[list1[1]] = x;  # Real memory location of the variable instruction is x + instruction_count
-        variable_name_list.append(list1[1])
-        variable_count += 1
+        error=error_finderv(list1)
+        if error==True:
+            break
+        else:
+            variable_list[list1[1]] = y  # Real memory location of the variable instruction is x + instruction_count
+            variable_name_list.append(list1[1])
+            variable_count += 1
     elif(list1[0][-1] == ":"):
-        error_finderl(list1)
-        label_list[list1[0][:-1]] = x - variable_count
+        error=error_finderl(list1)
+        if error==True:
+            break
+        label_list[list1[0][:-1]] = y - variable_count
         label_name_list.append(list1[0][:-1])
-    x += 1
+    y+=1
 
-error_finderf(variable_list,label_list,variable_name_list, label_name_list)
+error=error_finderf(variable_list,label_list,variable_name_list, label_name_list)
 
-instuction_count = x - variable_count
+instuction_count = y - variable_count
 #print(variable_list)
-
 ######################################################################################3
 # pass 2
 def binary_converter(a): 
@@ -107,8 +137,8 @@ def solver(list1, start_index, operation_dict, register_dict):
             ans = "00010" + register_dict[list1[start_index+1]] + binary_converter(list1[-1][1:]) # B type 
             return ans
     if(list1[start_index]=="mov"):
-        if(list1[1] in register_dict.keys()):
-            if(list1[2] in register_dict.keys()):
+        if(list1[start_index+1] in register_dict.keys()):
+            if(list1[start_index+2] in register_dict.keys()):
                 ans = "00011" +"00000"+ register_dict[list1[start_index+1]] + register_dict[list1[start_index+2]]
             return ans
     
@@ -119,7 +149,8 @@ def solver(list1, start_index, operation_dict, register_dict):
         return ans
     elif(operation_dict[list1[start_index]][1] == "B"):
         ans = operation_dict[list1[start_index]][0] + register_dict[list1[start_index+1]]
-        a = binary_converter(register_dict[list1[start_index+2]])
+        a = binary_converter(list1[start_index+2][1:])
+        #a = binary_converter(register_dict[list1[start_index+2]])
         ans = ans+ a
         return ans
 
@@ -148,7 +179,7 @@ def solver(list1, start_index, operation_dict, register_dict):
     ## Checking for mov instruction
     
 
-def checkerror(list1): 
+def checkerror(list1,i): 
     #print(x," ",i) 
 
     if list1[0]=="mov" or list1[0] in operation_dict.keys():
@@ -184,6 +215,75 @@ def checkerror(list1):
     
     return False
 
+def generate_error(list1):
+    if list1[0]=="mov" or list1[0] in operation_dict.keys():
+        if line_no==x-1:
+            if operation_dict[list1[0]][1]!="F":
+                print("Missing hlt instruction")
+                return
+        if operation_dict[list1[0]][1] =="A" and line_no!=x-1:
+            if len(list1)!=4:
+                print("Wrong syntax used for instructions")
+                return
+            if list1[1] in register_dict.keys() and list1[2] in register_dict.keys() and list1[3] in register_dict.keys():
+                pass
+            else:
+                print("Typos in instruction name or register name")
+                return
+        elif operation_dict[list1[0]][1]=="B" and line_no!=x-1:
+            if len(list1)!=3:
+                print("Wrong syntax used for instructions")
+                return
+            if list1[1] not in register_dict.keys():
+                print("Typos in instruction name or register name")
+                return
+            if list1[2][0]!="$":
+                print("General syntax error")
+                return
+            if (int(list1[2][1:])>=0 and int(list1[2][1:])<=255):
+                pass
+            else:
+                print("Illegal Immediate values")
+                return
+        elif operation_dict[list1[0]][1]=="C" and line_no!=x-1:
+            if len(list1)!=3:
+                print("Wrong syntax used for instructions")
+                return
+            if list1[1] in register_dict.keys() and list1[2] in register_dict.keys():
+                pass
+            else:
+                print("Typos in instruction name or register name")
+                return
+        elif operation_dict[list1[0]][1]=="D" and line_no!=x-1:
+            if len(list1)!=3:
+                print("Wrong syntax used for instructions")
+                return
+            if list1[1] in register_dict.keys(): 
+                    if list1[2] in variable_list.keys():   
+                        pass
+                    else:
+                        print("Use of undefined variables")
+                        return
+            else:
+                print("Typos in instruction name or register name")
+                return
+        elif operation_dict[list1[0]][1]=="E" and line_no!=x-1:
+            if len(list1)!=2:
+                print("Wrong syntax used for instructions")
+                return
+            if list1[1] in label_list.keys():
+                pass
+            else:
+                print("Use of undefined labels")
+        elif operation_dict[list1[0]][1]=="F" and line_no==x-1:
+            if len(list1)!=0:
+                print("Wrong syntax used for instructions")
+        else:
+            print("hlt not being used as the last instruction")
+    else:
+        print("Typos in instruction name or register name")
+
+
 
 operation_dict = {    # Does not have the two mov instructions
 "add":["00000","A"],  
@@ -215,29 +315,71 @@ register_dict = {
 "R6":"110",
 "FLAGS":"111"
 }
-i=0
-#print(x)
-for line in reading:
-    #print(line)
-    list1 = (line.strip()).split()
-    #print(list1)
-    if(len(line)==0):
-        continue
-    if(list1[0] == "var"):
-        i = i+1
-        continue
-    if(list1[0][-1] == ":"):
-        if(list1[0][:-1] in operation_dict.keys()):  # Checks if a operation name is used as a label
-            print(" Error in the assembly code 10")
-        else:
-            if(checkerror(list1[1:])): #checks if there are no errors in the instruction that follows after label
-                   print(solver(list1,1,operation_dict,register_dict))
+
+if error==False:
+    line_no=0
+    for line in reading:
+        list1=(line.strip()).split()
+        if(len(line)==0):
+            continue
+        if(list1[0] == "var"):
+            if(line_no!=x-1):
+                line_no = line_no+1
+                continue
+        if(list1[0][-1]==":"):
+            if(list1[0][:-1] in operation_dict.keys()):  # Checks if a operation name is used as a label
+                print("General Syntax Error")
+                error=True
+                break
             else:
-                print(" Error in the assembly code 11")
-    else:
-        if(checkerror(list1)): #checks if there are no errors
-            #print("check")
-            print(solver(list1,0,operation_dict,register_dict))
+                if(len(list1[1:])==0):
+                    print('General Syntax Error')
+                    error=True
+                    break
+                elif(checkerror(list1[1:],line_no)): #checks if there are no errors in the instruction that follows after label
+                    pass
+                else:
+                    generate_error(list1[1:])
+                    error=True
+                    break
         else:
-            print(" Error in the assembly code 12")
-    i+=1
+            if(checkerror(list1,line_no)): #checks if there are no errors
+                #print("check")
+                pass
+            else:
+                generate_error(list1[0:])
+                error=True
+                break
+        line_no+=1
+
+
+
+if(error==False):
+    ln=0
+    #print(x)
+    for line in reading:
+        #print(line)
+        list1 = (line.strip()).split()
+        #print(list1)
+        if(len(line)==0):
+            continue
+        if(list1[0] == "var"):
+            if(ln!=x-1):
+                ln = ln+1
+                continue
+        if(list1[0][-1] == ":"):
+            if(list1[0][:-1] in operation_dict.keys()):  # Checks if a operation name is used as a label
+                print(" Error in the assembly code 10")
+            else:
+                if(checkerror(list1[1:],ln)): #checks if there are no errors in the instruction that follows after label
+                    print(solver(list1,1,operation_dict,register_dict))
+                else:
+                    print(" Error in the assembly code 11")
+        else:
+            if(checkerror(list1,ln)): #checks if there are no errors
+                #print("check")
+                print(solver(list1,0,operation_dict,register_dict))
+            else:
+                print(" Error in the assembly code 12")
+        ln+=1
+
