@@ -6,9 +6,9 @@ reading = reading.split("\n")
 
 error=False
 
-def error_finderv(list1): #
+def error_finderv(list1,er_ln): #
     if(len(list1) != 2): # Checks if the variable initialization instruction has more than two strings.
-        print("General Syntax Error")
+        print("Line:",er_ln+1,"General Syntax Error")
          
         return True
     else:
@@ -16,25 +16,25 @@ def error_finderv(list1): #
             if((i.isalnum() or i == "_")): # Checks if the variable name has just alphanumeric characters or underscores.
                 pass
             else:
-                print("General Syntax Error")
+                print("Line:",er_ln+1,"General Syntax Error")
                 return True
     return False
 
-def error_finderl(list1):
+def error_finderl(list1,er_ln):
     colon_count = 0
     for i in list1:
         if ":" in i:
             colon_count += 1 
     
     if(colon_count > 1): # Checks if there are more than one colon used in a label initialization instruction.
-        print("General Syntax Error")
+        print("Line:",er_ln+1,"General Syntax Error")
         return True
 
     for i in list1[0][:-1]:
         if((i.isalnum() or i == "_")): # Checks if the label name has just alphanumeric characters or underscores.
             pass
         else:
-            print("General Syntax Error")
+            print("Line:",er_ln+1,"General Syntax Error")
             return True
     return False
     
@@ -44,16 +44,20 @@ def error_finderf(variable_list, label_list, variable_name_list, label_name_list
     
     intersection = [value for value in vkey if value in lkey]
     if(intersection != []):  # Checks if a variable name is used as a label or vice a versa.
-        print(" Misuse of labels as variables or vice-versa")
+        print("Line: ",variable_list[intersection[0]]+1," Misuse of labels as variables or vice-versa")
         return True
 
     if(len(variable_name_list) != len(list(set(variable_name_list)))): # Checks if a variable initialization is done more than once.
-        print(" Misuse of labels as variables or vice-versa")
-        return True
+        for j in list(set(variable_name_list)):
+            if variable_name_list.count(j)>1:
+                print("Line:",variable_list[j]+1, "Multiple Initialisation of the same variable")
+                return True        
     
     if(len(label_name_list) != len(list(set(label_name_list)))):
-        print(" General Syntan Error")
-        return True
+        for j in list(set(label_name_list)):
+            if label_name_list.count(j)>1:
+                print("Line:",label_list[j]+1-variable_count," General Syntax Error")
+                return True
 
     variable_values = variable_list.values()
 
@@ -61,7 +65,7 @@ def error_finderf(variable_list, label_list, variable_name_list, label_name_list
         if i in variable_values:
             pass
         else:
-            print(" General Syntax Error ")
+            print("Line:",i+1," General Syntax Error ")
             return True
     return False
 
@@ -93,7 +97,7 @@ for line in reading:
     if(len(line)==0):
         continue
     if(list1[0] == "var"):
-        error=error_finderv(list1)
+        error=error_finderv(list1,y)
         if error==True:
             break
         else:
@@ -101,7 +105,7 @@ for line in reading:
             variable_name_list.append(list1[1])
             variable_count += 1
     elif(list1[0][-1] == ":"):
-        error=error_finderl(list1)
+        error=error_finderl(list1,y)
         if error==True:
             break
         label_list[list1[0][:-1]] = y - variable_count
@@ -136,10 +140,12 @@ def solver(list1, start_index, operation_dict, register_dict):
         if(list1[start_index+1] in register_dict.keys()):
             ans = "00010" + register_dict[list1[start_index+1]] + binary_converter(list1[-1][1:]) # B type 
             return ans
-    if(list1[start_index]=="mov"):
+    if(list1[start_index]=="mov"):    #mov type C
         if(list1[start_index+1] in register_dict.keys()):
             if(list1[start_index+2] in register_dict.keys()):
                 ans = "00011" +"00000"+ register_dict[list1[start_index+1]] + register_dict[list1[start_index+2]]
+            elif(list1[start_index+2]=="FLAGS"):
+                ans = "00011" +"00000"+ register_dict[list1[start_index+1]]+"111"
             return ans
     
     if(operation_dict[list1[start_index]][1] == "A"):
@@ -191,7 +197,7 @@ def checkerror(list1,i):
             if list1[0]=="mov":
                 if list1[1] in register_dict.keys() and list1[2][0]=="$" and (int(list1[2][1:])>=0 and int(list1[2][1:])<=255):
                     return True
-                elif list1[1] in register_dict.keys() and list1[2] in register_dict.keys():
+                elif list1[1] in register_dict.keys() and (list1[2] in register_dict.keys() or list1[2]=="FLAGS"):
                     return True
             elif operation_dict[list1[0]][1]=="B": #checks if instruction is B
                 if list1[1] in register_dict.keys() and list1[2][0]=="$" and (int(list1[2][1:])>=0 and int(list1[2][1:])<=255): #syntax check
@@ -215,73 +221,98 @@ def checkerror(list1,i):
     
     return False
 
-def generate_error(list1):
+def generate_error(list1,error_line):
     if list1[0]=="mov" or list1[0] in operation_dict.keys():
         if line_no==x-1:
             if operation_dict[list1[0]][1]!="F":
-                print("Missing hlt instruction")
+                print("Line : ",error_line+1,"Missing hlt instruction")
                 return
+        if (list1[0]=="mov"):
+            if(len(list1)==3 and list1[2][0]=="$"):
+                if len(list1)!=3 :
+                    print("Line : ",error_line+1,"Wrong syntax used for instructions")
+                    return
+                if list1[1] not in register_dict.keys():
+                    print("Line : ",error_line+1,"Typos in instruction name or register name")
+                    return
+                if list1[2][0]!="$":
+                    print("Line : ",error_line+1,"General syntax error")
+                    return
+                if (int(list1[2][1:])>=0 and int(list1[2][1:])<=255):
+                    pass
+                else:
+                    print("Line : ",error_line+1,"Illegal Immediate values")
+                    return
+            elif len(list1)==3 and (list1[2] in register_dict.keys() or list1[2]=="FLAGS"):
+                if list1[1] in register_dict.keys() :
+                    pass
+                else:
+                    print("Line : ",error_line+1,"Typos in instruction name or register name")
+                    return  
+            else:
+                print("Line : ",error_line+1,"General Syntax Error")  
+
         if operation_dict[list1[0]][1] =="A" and line_no!=x-1:
             if len(list1)!=4:
-                print("Wrong syntax used for instructions")
+                print("Line : ",error_line+1,"Wrong syntax used for instructions")
                 return
             if list1[1] in register_dict.keys() and list1[2] in register_dict.keys() and list1[3] in register_dict.keys():
                 pass
             else:
-                print("Typos in instruction name or register name")
+                print("Line : ",error_line+1,"Typos in instruction name or register name")
                 return
         elif operation_dict[list1[0]][1]=="B" and line_no!=x-1:
             if len(list1)!=3:
-                print("Wrong syntax used for instructions")
+                print("Line : ",error_line+1,"Wrong syntax used for instructions")
                 return
             if list1[1] not in register_dict.keys():
-                print("Typos in instruction name or register name")
+                print("Line : ",error_line+1,"Typos in instruction name or register name")
                 return
             if list1[2][0]!="$":
-                print("General syntax error")
+                print("Line : ",error_line+1,"General syntax error")
                 return
             if (int(list1[2][1:])>=0 and int(list1[2][1:])<=255):
                 pass
             else:
-                print("Illegal Immediate values")
+                print("Line : ",error_line+1,"Illegal Immediate values")
                 return
         elif operation_dict[list1[0]][1]=="C" and line_no!=x-1:
             if len(list1)!=3:
-                print("Wrong syntax used for instructions")
+                print("Line : ",error_line+1,"Wrong syntax used for instructions")
                 return
             if list1[1] in register_dict.keys() and list1[2] in register_dict.keys():
                 pass
             else:
-                print("Typos in instruction name or register name")
+                print("Line : ",error_line+1,"Typos in instruction name or register name")
                 return
         elif operation_dict[list1[0]][1]=="D" and line_no!=x-1:
             if len(list1)!=3:
-                print("Wrong syntax used for instructions")
+                print("Line : ",error_line+1,"Wrong syntax used for instructions")
                 return
             if list1[1] in register_dict.keys(): 
                     if list1[2] in variable_list.keys():   
                         pass
                     else:
-                        print("Use of undefined variables")
+                        print("Line : ",error_line+1,"Use of undefined variables")
                         return
             else:
-                print("Typos in instruction name or register name")
+                print("Line : ",error_line+1,"Typos in instruction name or register name")
                 return
         elif operation_dict[list1[0]][1]=="E" and line_no!=x-1:
             if len(list1)!=2:
-                print("Wrong syntax used for instructions")
+                print("Line : ",error_line+1,"Wrong syntax used for instructions")
                 return
             if list1[1] in label_list.keys():
                 pass
             else:
-                print("Use of undefined labels")
+                print("Line : ",error_line+1,"Use of undefined labels")
         elif operation_dict[list1[0]][1]=="F" and line_no==x-1:
             if len(list1)!=0:
-                print("Wrong syntax used for instructions")
+                print("Line : ",error_line+1,"Wrong syntax used for instructions")
         else:
-            print("hlt not being used as the last instruction")
+            print("Line : ",error_line+1,"hlt not being used as the last instruction")
     else:
-        print("Typos in instruction name or register name")
+        print("Line : ",error_line+1,"Typos in instruction name or register name")
 
 
 
@@ -312,8 +343,7 @@ register_dict = {
 "R3":"011",
 "R4":"100",
 "R5":"101",
-"R6":"110",
-"FLAGS":"111"
+"R6":"110"
 }
 
 if error==False:
@@ -328,18 +358,18 @@ if error==False:
                 continue
         if(list1[0][-1]==":"):
             if(list1[0][:-1] in operation_dict.keys()):  # Checks if a operation name is used as a label
-                print("General Syntax Error")
+                print("Line : ",line_no+1,"General Syntax Error")
                 error=True
                 break
             else:
                 if(len(list1[1:])==0):
-                    print('General Syntax Error')
+                    print("Line : ",line_no+1,'General Syntax Error')
                     error=True
                     break
                 elif(checkerror(list1[1:],line_no)): #checks if there are no errors in the instruction that follows after label
                     pass
                 else:
-                    generate_error(list1[1:])
+                    generate_error(list1[1:],line_no)
                     error=True
                     break
         else:
@@ -347,7 +377,7 @@ if error==False:
                 #print("check")
                 pass
             else:
-                generate_error(list1[0:])
+                generate_error(list1[0:],line_no)
                 error=True
                 break
         line_no+=1
@@ -369,17 +399,17 @@ if(error==False):
                 continue
         if(list1[0][-1] == ":"):
             if(list1[0][:-1] in operation_dict.keys()):  # Checks if a operation name is used as a label
-                print(" Error in the assembly code 10")
+                print("Line : ",ln+1,"General Syntax error")
             else:
                 if(checkerror(list1[1:],ln)): #checks if there are no errors in the instruction that follows after label
                     print(solver(list1,1,operation_dict,register_dict))
                 else:
-                    print(" Error in the assembly code 11")
+                    print("Line : ",ln+1,"General Syntax Error")
         else:
             if(checkerror(list1,ln)): #checks if there are no errors
                 #print("check")
                 print(solver(list1,0,operation_dict,register_dict))
             else:
-                print(" Error in the assembly code 12")
+                print("Line : ",ln+1,"General Syntax error")
         ln+=1
 
