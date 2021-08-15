@@ -65,7 +65,7 @@ def error_finderf(variable_list, label_list, variable_name_list, label_name_list
         if i in variable_values:
             pass
         else:
-            print("Line:",i+1," General Syntax Error ")
+            print("Line:",i+1,"Error: Variable not defined at appropriate time")
             return True
     return False
 
@@ -112,7 +112,7 @@ for line in reading:
         label_name_list.append(list1[0][:-1])
     y+=1
 
-error=error_finderf(variable_list,label_list,variable_name_list, label_name_list)
+error=error or error_finderf(variable_list,label_list,variable_name_list, label_name_list)
 
 instuction_count = y - variable_count
 #print(variable_list)
@@ -223,7 +223,7 @@ def checkerror(list1,i):
 
 def generate_error(list1,error_line):
     if list1[0]=="mov" or list1[0] in operation_dict.keys():
-        if line_no==x-1:
+        if error_line==x-1:
             if operation_dict[list1[0]][1]!="F":
                 print("Line : ",error_line+1,"Missing hlt instruction")
                 return
@@ -358,12 +358,12 @@ if error==False:
                 continue
         if(list1[0][-1]==":"):
             if(list1[0][:-1] in operation_dict.keys()):  # Checks if a operation name is used as a label
-                print("Line : ",line_no+1,"General Syntax Error")
+                print("Line :",line_no+1,"General Syntax Error")
                 error=True
                 break
             else:
                 if(len(list1[1:])==0):
-                    print("Line : ",line_no+1,'General Syntax Error')
+                    print("Line :",line_no+1,'General Syntax Error')
                     error=True
                     break
                 elif(checkerror(list1[1:],line_no)): #checks if there are no errors in the instruction that follows after label
